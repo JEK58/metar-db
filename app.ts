@@ -30,7 +30,7 @@ function main() {
     try {
       const metarData = new MetarDataModel(res);
       const dbRes = await metarData.save();
-      console.log(dbRes);
+      // console.log(dbRes);
     } catch (error) {
       sendMail("QNH Scraper Error", JSON.stringify(error));
       console.log(error);
