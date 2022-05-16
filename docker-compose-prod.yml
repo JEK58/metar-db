@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  server:
+    image: node:17.8.0-alpine3.15
+    restart: always
+    container_name: qnh-scraper-server
+    environment:
+      - NODE_ENV=production
+      - DB_CONNECTION=${DB_CONNECTION}
+
+    working_dir: /qnh-scraper/
+    volumes:
+      - ./:/qnh-scraper:rw
+
+    command: ./docker-entrypoint.sh
+    depends_on:
+      - db
+    # ports:
+    #   - 3031:3031
+
+    # labels:
+    #   traefik.enable: true
+    #   traefik.http.routers.qnh-scraper.rule: "Host(qnh.lurb.org)"
+    #   traefik.http.routers.qnh-scraper.entrypoints: websecure
+    #   traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
+    #   traefik.http.routers.qnh-scraper.priority: 200
+    #   traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
+
+  db:
+      image: mongo:5
+      restart: always
+      container_name: qnh-scraper-db
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      volumes:
+        - ./db:/data/db:rw
+
+  
+
+  
