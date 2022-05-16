@@ -8,10 +8,10 @@ import cron from "cron";
 import { sendMail } from "./config/sendMail";
 
 // Run every hour from 6h to 21h
-// new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
+new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 
 // Run every 30 seconds for development
-new cron.CronJob("30 * * * * *", main, null, true, "UTC");
+// new cron.CronJob("30 * * * * *", main, null, true, "UTC");
 
 function main() {
   console.log("Running cron job at ", new Date());
