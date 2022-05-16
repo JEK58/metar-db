@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   server:
-    image: node:17.8.0-alpine3.15
+    build: .
     restart: always
     container_name: qnh-scraper-server
     environment:
