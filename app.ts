@@ -6,8 +6,32 @@ import type { MetarDataCreate } from "./types/MetarData";
 import { ICAO } from "./config/ICAO";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
+import express from "express";
+import http from "http";
+import routes from "./routes";
+
+// Error handling
+process.on("uncaughtException", (err) => {
+  console.error("There was an uncaught error", err);
+  process.exit(1); //mandatory (as per the Node.js docs)
+});
 
 console.log(`Running in ${process.env.NODE_ENV} mode`);
+
+const app = express();
+const server = http.createServer(app);
+
+// Middleware
+app.use(express.json());
+// app.use(cors());
+
+app.use("", routes);
+
+const port = process.env.PORT || 3031;
+
+server.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});
 
 if (process.env.NODE_ENV === "production") {
   // Run every hour from 6h to 21h at x:03h

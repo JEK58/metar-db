@@ -6,6 +6,8 @@ const dbName = process.env.MONGO_DB_NAME;
 // Initial connection
 try {
   if (!uri) throw Error("No DB_CONNECTION env variable found");
+
+  // Allow undefined dbName in development to use test DB
   if (!dbName && process.env.NODE_ENV === "production")
     throw Error("No DB_CONNECTION env variable found");
 

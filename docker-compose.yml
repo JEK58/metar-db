@@ -8,11 +8,11 @@ services:
     environment:
       - NODE_ENV=development
       - DB_CONNECTION=${DB_CONNECTION}
-
     working_dir: /qnh-scraper/
     volumes:
       - ./:/qnh-scraper:rw
-
     command: sh -c "yarn install && yarn dev"
+    ports:
+      - 3031:3031
 
  

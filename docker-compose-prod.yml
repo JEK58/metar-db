@@ -17,15 +17,12 @@ services:
 
     command: sh -c "yarn install && yarn start"
 
-    # ports:
-    #   - 3031:3031
-
-    # labels:
-    #   traefik.enable: true
-    #   traefik.http.routers.qnh-scraper.rule: "Host(qnh.lurb.org)"
-    #   traefik.http.routers.qnh-scraper.entrypoints: websecure
-    #   traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
-    #   traefik.http.routers.qnh-scraper.priority: 200
-    #   traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
+    labels:
+      traefik.enable: true
+      traefik.http.routers.qnh-scraper.rule: "Host(qnh.lurb.org)"
+      traefik.http.routers.qnh-scraper.entrypoints: websecure
+      traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
+      traefik.http.routers.qnh-scraper.priority: 200
+      traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
 
   
