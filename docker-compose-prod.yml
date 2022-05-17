@@ -19,7 +19,7 @@ services:
 
     labels:
       traefik.enable: true
-      traefik.http.routers.qnh-scraper.rule: "Host(qnh.lurb.org)"
+      traefik.http.routers.qnh-scraper.rule: "Host(`qnh.lurb.org`)"
       traefik.http.routers.qnh-scraper.entrypoints: websecure
       traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
       traefik.http.routers.qnh-scraper.priority: 200
