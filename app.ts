@@ -6,7 +6,7 @@ import type { MetarDataCreate } from "./types/MetarData";
 import { ICAO } from "./config/ICAO";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
-import express, { Request, Response } from "express";
+import express from "express";
 import http from "http";
 import routes from "./routes";
 
