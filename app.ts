@@ -6,7 +6,7 @@ import type { MetarDataCreate } from "./types/MetarData";
 import { ICAO } from "./config/ICAO";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 import routes from "./routes";
 
@@ -25,6 +25,7 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
+app.get("/", (_req, res) => res.json("Such empty"));
 app.use("", routes);
 
 const port = process.env.PORT || 3031;
