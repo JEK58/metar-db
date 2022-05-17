@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=development
       - DB_CONNECTION=${DB_CONNECTION}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
 
     working_dir: /qnh-scraper/
     volumes:
