@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --pretty --transpile-only app.ts",
     "start": "ts-node --transpile-only app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typecheck": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
