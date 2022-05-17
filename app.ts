@@ -9,7 +9,7 @@ import { sendMail } from "./config/sendMail";
 
 console.log(`Running in ${process.env.NODE_ENV} mode`);
 
-// Run every hour from 6h to 21h
+// Run every hour from 6h to 21h at x:03h
 new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 
 // Run every 30 seconds for development
@@ -31,10 +31,8 @@ function main() {
     // Save new entry
     try {
       const metarData = new MetarDataModel(res);
-      const dbRes = await metarData.save();
+      await metarData.save();
       console.log("…done");
-
-      // console.log(dbRes);
     } catch (error) {
       sendMail("QNH Scraper Error", JSON.stringify(error));
       console.log(error);
