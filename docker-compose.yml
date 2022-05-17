@@ -13,6 +13,6 @@ services:
     volumes:
       - ./:/qnh-scraper:rw
 
-    command: ./docker-entrypoint.sh
+    command: sh -c "yarn install && yarn dev"
 
  

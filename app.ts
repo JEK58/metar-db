@@ -7,6 +7,8 @@ import { ICAO } from "./config/ICAO";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
 
+console.log(`Running in ${process.env.NODE_ENV} mode`);
+
 // Run every hour from 6h to 21h
 new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 
@@ -30,6 +32,8 @@ function main() {
     try {
       const metarData = new MetarDataModel(res);
       const dbRes = await metarData.save();
+      console.log("…done");
+
       // console.log(dbRes);
     } catch (error) {
       sendMail("QNH Scraper Error", JSON.stringify(error));
@@ -40,7 +44,6 @@ function main() {
 
 // Fetch data with ICAO Code and scrape qnh & METAR
 async function fetch(ICAO: string): Promise<MetarDataCreate | undefined> {
-  console.log("Fetching METAR data for " + ICAO);
   try {
     const res = await axios.get("https://metar-taf.com/" + ICAO);
     const html = res.data;
