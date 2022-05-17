@@ -14,7 +14,7 @@ services:
     volumes:
       - ./:/qnh-scraper:rw
 
-    command: bash -c "yarn install && yarn start"
+    command: sh -c "yarn install && yarn start"
 
     # ports:
     #   - 3031:3031
