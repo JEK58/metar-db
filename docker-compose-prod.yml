@@ -25,4 +25,7 @@ services:
       traefik.http.routers.qnh-scraper.priority: 200
       traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
 
-  
+networks:
+  default:
+    external:
+      name: traefik
