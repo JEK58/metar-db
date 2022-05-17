@@ -9,11 +9,13 @@ import { sendMail } from "./config/sendMail";
 
 console.log(`Running in ${process.env.NODE_ENV} mode`);
 
-// Run every hour from 6h to 21h at x:03h
-new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
-
-// Run every 30 seconds for development
-// new cron.CronJob("30 * * * * *", main, null, true, "UTC");
+if (process.env.NODE_ENV === "production") {
+  // Run every hour from 6h to 21h at x:03h
+  new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
+} else {
+  // Run every 30 seconds for development
+  new cron.CronJob("30 * * * * *", main, null, true, "UTC");
+}
 
 function main() {
   console.log("Running cron job at ", new Date());
@@ -32,12 +34,12 @@ function main() {
     try {
       const metarData = new MetarDataModel(res);
       await metarData.save();
-      console.log("…done");
     } catch (error) {
       sendMail("QNH Scraper Error", JSON.stringify(error));
       console.log(error);
     }
   });
+  console.log("…done");
 }
 
 // Fetch data with ICAO Code and scrape qnh & METAR
@@ -51,8 +53,7 @@ async function fetch(ICAO: string): Promise<MetarDataCreate | undefined> {
     let scrapedata = $("h3.mb-0").eq(4).text().replace(" inHg", "").trim();
 
     // Convert it to hPa and round it to 2 decimals
-    const qnhInHg = parseFloat(scrapedata) / 0.02953;
-    const qnh = Math.round((qnhInHg + Number.EPSILON) * 100) / 100;
+    const qnh = Math.round(parseFloat(scrapedata) / 0.02953);
     // Find raw METAR data
     const rawMetar = $("code").text();
 
