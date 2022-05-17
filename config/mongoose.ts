@@ -1,8 +1,15 @@
-import mongoose, { Error } from "mongoose";
+import mongoose from "mongoose";
+
+const uri = process.env.DB_CONNECTION;
+const dbName = process.env.MONGO_DB_NAME;
 
 // Initial connection
 try {
-  mongoose.connect(process.env.DB_CONNECTION ?? "", {});
+  if (!uri) throw Error("No DB_CONNECTION env variable found");
+  if (!dbName && process.env.NODE_ENV === "production")
+    throw Error("No DB_CONNECTION env variable found");
+
+  mongoose.connect(uri, { dbName });
 } catch (error) {
   console.error(error);
 }

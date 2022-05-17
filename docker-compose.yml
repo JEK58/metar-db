@@ -19,16 +19,4 @@ services:
     ports:
       - 3031:3031
 
-  db:
-    image: mongo:4
-    restart: always
-    container_name: qnh-scraper-db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-
-    #volumes:
-     # - ./db:/data/db:rw
-     # - db
-
  

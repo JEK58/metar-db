@@ -14,8 +14,7 @@ services:
       - ./:/qnh-scraper:rw
 
     command: ./docker-entrypoint.sh
-    depends_on:
-      - db
+
     # ports:
     #   - 3031:3031
 
@@ -26,17 +25,5 @@ services:
     #   traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
     #   traefik.http.routers.qnh-scraper.priority: 200
     #   traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
-
-  db:
-      image: mongo:4
-      restart: always
-      container_name: qnh-scraper-db
-      environment:
-        - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
-        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      volumes:
-        - ./db:/data/db:rw
-
-  
 
   
