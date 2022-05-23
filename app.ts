@@ -10,6 +10,8 @@ import express from "express";
 import http from "http";
 import routes from "./routes";
 
+import { compareAsc } from "date-fns";
+
 // Error handling
 process.on("uncaughtException", (err) => {
   console.error("There was an uncaught error", err);
@@ -25,7 +27,26 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
-app.get("/", (_req, res) => res.json("Such empty"));
+app.get("/", async (req, res) => {
+  try {
+    const response = await MetarDataModel.findOne().sort({ _id: -1 }).limit(1);
+    if (!response) return res.status(201).send("Such emtpy");
+
+    const entryDate = new Date(response.createdAt).getTime();
+    const now = new Date().getTime();
+    const differenceInMinutes = Math.abs(now - entryDate) / 1000 / 60;
+
+    if (differenceInMinutes < 100) return res.status(201).send("Such healthy");
+
+    res.status(201).send("Such bad 😕");
+
+    // res.status(201).send(foo);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json("Error: " + error);
+  }
+});
+
 app.use("", routes);
 
 const port = process.env.PORT || 3031;
@@ -39,7 +60,7 @@ if (process.env.NODE_ENV === "production") {
   new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 } else {
   // Run every 30 seconds for development
-  new cron.CronJob("30 * * * * *", main, null, true, "UTC");
+  new cron.CronJob("5 * * * * *", main, null, true, "UTC");
 }
 
 function main() {
