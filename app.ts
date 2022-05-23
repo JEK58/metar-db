@@ -55,12 +55,14 @@ server.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
 
-if (process.env.NODE_ENV === "production") {
-  // Run every hour from 6h to 21h at x:03h
-  new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
-} else {
+if (process.env.NODE_ENV === "development") {
   // Run every 30 seconds for development
+  console.log("Run cron job every 30 seconds for development");
   new cron.CronJob("5 * * * * *", main, null, true, "UTC");
+} else {
+  // Run every hour from 6h to 21h at x:03h
+  console.log("Run cron job every hour from 6h to 21h at x:03h");
+  new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 }
 
 function main() {
