@@ -42,4 +42,6 @@ const IcaoDataSchema = new Schema<IcaoData>({
   },
 });
 
+IcaoDataSchema.index({ location: "2dsphere" });
+
 export default model("IcaoData", IcaoDataSchema);

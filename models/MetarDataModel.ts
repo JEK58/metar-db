@@ -6,10 +6,6 @@ const MetarDataSchema = new Schema<MetarData>({
     type: String,
     required: true,
   },
-  qnh: {
-    type: Number,
-    required: false,
-  },
   rawMetar: {
     type: String,
     required: false,

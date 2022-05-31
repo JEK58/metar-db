@@ -1,16 +1,14 @@
+import "dotenv/config";
 import axios from "axios";
-import * as cheerio from "cheerio";
 import "./config/mongoose";
 import MetarDataModel from "./models/MetarDataModel";
+import IcaoDataModel from "./models/IcaoDataModel";
 import type { MetarDataCreate } from "./types/MetarData";
-import { ICAO } from "./config/ICAO";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
 import express from "express";
 import http from "http";
 import routes from "./routes";
-
-import { compareAsc } from "date-fns";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -39,8 +37,6 @@ app.get("/", async (req, res) => {
     if (differenceInMinutes < 100) return res.status(201).send("Such healthy");
 
     res.status(201).send("Such bad 😕");
-
-    // res.status(201).send(foo);
   } catch (error) {
     console.error(error);
     res.status(400).json("Error: " + error);
@@ -64,51 +60,64 @@ if (process.env.NODE_ENV === "development") {
   console.log("Run cron job every hour from 6h to 21h at x:03h");
   new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 }
-
-function main() {
+async function main() {
   console.log("Running cron job at ", new Date());
-  ICAO.forEach(async (ICAO) => {
-    // Fetch the data with ICAO Code
-    const res = await fetch(ICAO);
-    if (!res) return;
+  try {
+    // TODO: Add a service for this
+    const listOfStations = (await IcaoDataModel.find().select("ICAO")).map(
+      (x) => x.ICAO
+    );
 
-    // Get latest entry from database
-    const latest = await MetarDataModel.findOne({ ICAO }).sort("-_id");
+    listOfStations.forEach(async (ICAO) => {
+      // Fetch the data with ICAO Code
+      const res = await fetch(ICAO);
 
-    // Check if rawMetar has changed before saving a new entry
-    if (latest && latest.rawMetar == res.rawMetar) return;
+      if (!res) return;
 
-    // Save new entry
-    try {
-      const metarData = new MetarDataModel(res);
-      await metarData.save();
-    } catch (error) {
-      sendMail("QNH Scraper Error", JSON.stringify(error));
-      console.log(error);
-    }
-  });
-  console.log("…done");
+      // Get latest entry from database
+      const latest = await MetarDataModel.findOne({ ICAO }).sort("-_id");
+
+      // Check if rawMetar has changed before saving a new entry
+      if (latest && latest.rawMetar == res.rawMetar) return;
+
+      // Save new entry
+      try {
+        const metarData = new MetarDataModel(res);
+        await metarData.save();
+      } catch (error) {
+        sendMail("QNH Scraper Error", JSON.stringify(error));
+        console.log(ICAO, error);
+      }
+    });
+    console.log("…done");
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-// Fetch data with ICAO Code and scrape qnh & METAR
+// Fetch METAR data for ICAO Code
 async function fetch(ICAO: string): Promise<MetarDataCreate | undefined> {
   try {
-    const res = await axios.get("https://metar-taf.com/" + ICAO);
-    const html = res.data;
-    const $ = cheerio.load(html);
+    const options = {
+      headers: { "X-API-Key": "bee352440a544835a302748074" },
+    };
 
-    // Find qnh
-    let scrapedata = $("h3.mb-0").eq(4).text().replace(" inHg", "").trim();
+    const res = await axios.get(
+      "https://api.checkwx.com/metar/" + ICAO + "/decoded",
+      options
+    );
 
-    // Convert it to hPa and round it to 2 decimals
-    const qnh = Math.round(parseFloat(scrapedata) / 0.02953);
-    // Find raw METAR data
-    const rawMetar = $("code").text();
+    if (!res.data || res.data.results === 0) return;
 
-    if (!rawMetar) return;
+    const data = res.data.data[0];
 
-    return { ICAO, qnh, rawMetar };
+    return {
+      ICAO: data.icao,
+      rawMetar: data.raw_text,
+    };
   } catch (error) {
+    console.log(ICAO);
+
     sendMail("QNH Scraper Error", JSON.stringify(error));
     console.error(error);
   }
