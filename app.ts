@@ -62,6 +62,7 @@ if (process.env.NODE_ENV === "development") {
 }
 async function main() {
   console.log("Running cron job at ", new Date());
+  const errors: any[] = [];
   try {
     // TODO: Add a service for this
     const listOfStations = (await IcaoDataModel.find().select("ICAO")).map(
@@ -69,26 +70,29 @@ async function main() {
     );
 
     listOfStations.forEach(async (ICAO) => {
-      // Fetch the data with ICAO Code
-      const res = await fetch(ICAO);
-
-      if (!res) return;
-
-      // Get latest entry from database
-      const latest = await MetarDataModel.findOne({ ICAO }).sort("-_id");
-
-      // Check if rawMetar has changed before saving a new entry
-      if (latest && latest.rawMetar == res.rawMetar) return;
-
-      // Save new entry
       try {
+        // Fetch the data with ICAO Code
+        const res = await fetch(ICAO);
+
+        if (!res) return;
+
+        // Get latest entry from database
+        const latest = await MetarDataModel.findOne({ ICAO }).sort("-_id");
+
+        // Check if rawMetar has changed before saving a new entry
+        if (latest && latest.rawMetar == res.rawMetar) return;
+
+        // Save new entry
         const metarData = new MetarDataModel(res);
         await metarData.save();
       } catch (error) {
-        sendMail("QNH Scraper Error", JSON.stringify(error));
         console.log(ICAO, error);
+        errors.push(error);
       }
     });
+    if (errors.length > 0)
+      sendMail("QNH Scraper Error", JSON.stringify(errors));
+    errors.length = 0;
     console.log("…done");
   } catch (error) {
     console.log(error);
@@ -97,28 +101,21 @@ async function main() {
 
 // Fetch METAR data for ICAO Code
 async function fetch(ICAO: string): Promise<MetarDataCreate | undefined> {
-  try {
-    const options = {
-      headers: { "X-API-Key": "bee352440a544835a302748074" },
-    };
+  const options = {
+    headers: { "X-API-Key": "bee352440a544835a302748074" },
+  };
 
-    const res = await axios.get(
-      "https://api.checkwx.com/metar/" + ICAO + "/decoded",
-      options
-    );
+  const res = await axios.get(
+    "https://api.checkwx.com/metar/" + ICAO + "/decoded",
+    options
+  );
 
-    if (!res.data || res.data.results === 0) return;
+  if (!res.data || res.data.results === 0) return;
 
-    const data = res.data.data[0];
+  const data = res.data.data[0];
 
-    return {
-      ICAO: data.icao,
-      rawMetar: data.raw_text,
-    };
-  } catch (error) {
-    console.log(ICAO);
-
-    sendMail("QNH Scraper Error", JSON.stringify(error));
-    console.error(error);
-  }
+  return {
+    ICAO: data.icao,
+    rawMetar: data.raw_text,
+  };
 }
