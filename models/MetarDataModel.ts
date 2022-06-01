@@ -10,6 +10,10 @@ const MetarDataSchema = new Schema<MetarData>({
     type: String,
     required: false,
   },
+  observed: {
+    type: String,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: () => new Date(),

@@ -3,7 +3,7 @@ import axios from "axios";
 import "./config/mongoose";
 import MetarDataModel from "./models/MetarDataModel";
 import IcaoDataModel from "./models/IcaoDataModel";
-import type { MetarDataCreate } from "./types/MetarData";
+import type { MetarApiResponses } from "./types/MetarData";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
 import express from "express";
@@ -25,7 +25,8 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
-app.get("/", async (req, res) => {
+// Check health status
+app.get("/", async (_req, res) => {
   try {
     const response = await MetarDataModel.findOne().sort({ _id: -1 }).limit(1);
     if (!response) return res.status(201).send("Such emtpy");
@@ -60,62 +61,50 @@ if (process.env.NODE_ENV === "development") {
   console.log("Run cron job every hour from 6h to 21h at x:03h");
   new cron.CronJob("3 6-21 * * * *", main, null, true, "UTC");
 }
+
 async function main() {
   console.log("Running cron job at ", new Date());
-  const errors: any[] = [];
   try {
-    // TODO: Add a service for this
-    const listOfStations = (await IcaoDataModel.find().select("ICAO")).map(
-      (x) => x.ICAO
-    );
+    const listOfStations = await getIcaoStationsFromDb();
 
-    listOfStations.forEach(async (ICAO) => {
-      try {
-        // Fetch the data with ICAO Code
-        const res = await fetch(ICAO);
+    // Fetch the data with ICAO Code
+    const res = await fetch(listOfStations);
 
-        if (!res) return;
+    if (!res) throw Error("No data received");
 
-        // Get latest entry from database
-        const latest = await MetarDataModel.findOne({ ICAO }).sort("-_id");
-
-        // Check if rawMetar has changed before saving a new entry
-        if (latest && latest.rawMetar == res.rawMetar) return;
-
-        // Save new entry
-        const metarData = new MetarDataModel(res);
-        await metarData.save();
-      } catch (error) {
-        console.log(ICAO, error);
-        errors.push(error);
-      }
+    const newDbEntries = res.data.map((el) => {
+      return {
+        ICAO: el.icao,
+        rawMetar: el.raw_text,
+        observed: el.observed,
+      };
     });
-    if (errors.length > 0)
-      sendMail("QNH Scraper Error", JSON.stringify(errors));
-    errors.length = 0;
+    await MetarDataModel.insertMany(newDbEntries);
+
     console.log("…done");
   } catch (error) {
     console.log(error);
+    sendMail("METAR DB Error", JSON.stringify(error));
   }
 }
 
-// Fetch METAR data for ICAO Code
-async function fetch(ICAO: string): Promise<MetarDataCreate | undefined> {
+// Fetch METAR data for ICAO Codes
+async function fetch(ICAO: string[]): Promise<MetarApiResponses | undefined> {
+  if (typeof process.env.API_KEY != "string") throw Error("API_KEY not set");
+
   const options = {
-    headers: { "X-API-Key": "bee352440a544835a302748074" },
+    headers: { "X-API-Key": process.env.API_KEY },
   };
 
   const res = await axios.get(
-    "https://api.checkwx.com/metar/" + ICAO + "/decoded",
+    "https://api.checkwx.com/metar/" + ICAO.join(",") + "/decoded",
     options
   );
-
   if (!res.data || res.data.results === 0) return;
 
-  const data = res.data.data[0];
+  return res.data;
+}
 
-  return {
-    ICAO: data.icao,
-    rawMetar: data.raw_text,
-  };
+async function getIcaoStationsFromDb(): Promise<string[]> {
+  return (await IcaoDataModel.find().select("ICAO")).map((x) => x.ICAO);
 }
