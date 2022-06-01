@@ -2,13 +2,13 @@ import "dotenv/config";
 import axios from "axios";
 import "./config/mongoose";
 import MetarDataModel from "./models/MetarDataModel";
-import IcaoDataModel from "./models/IcaoDataModel";
 import type { MetarApiResponses } from "./types/MetarData";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
 import express from "express";
 import http from "http";
 import routes from "./routes";
+import { getIcaoStationsFromDb } from "./service/IcaoService";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -81,8 +81,4 @@ async function fetch(ICAO: string[]): Promise<MetarApiResponses | undefined> {
   if (!res.data || res.data.results === 0) return;
 
   return res.data;
-}
-
-async function getIcaoStationsFromDb(): Promise<string[]> {
-  return (await IcaoDataModel.find().select("ICAO")).map((x) => x.ICAO);
 }

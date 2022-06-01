@@ -8,6 +8,63 @@ import metarParser from "metar-parser";
 
 const router = express.Router();
 
+router.get("/decoded", async (req: Request, res: Response) => {
+  getMetarData(req, res, true);
+});
+
+router.get("/", async (req: Request, res: Response) => {
+  getMetarData(req, res);
+});
+
+async function getMetarData(req: Request, res: Response, decoded?: boolean) {
+  if (!req.query.lat || !req.query.long)
+    return res.status(400).send("Wrong coordinate format (?lat=50&long=4)");
+
+  // Find station by coordinates
+  try {
+    const response = await IcaoDataModel.findOne({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [req.query.long, req.query.lat],
+          },
+        },
+      },
+    });
+    if (!response)
+      return res.status(400).send("No station found for this location");
+
+    if (typeof req.query.date != "string" || !req.query.date)
+      return res.status(400).send("Date is not a string (?date=2022-12-12)");
+
+    // Find station by date
+    const date = new Date(req.query.date);
+
+    const metarData = await MetarDataModel.findOne({
+      ICAO: response.ICAO,
+      createdAt: {
+        $lte: endOfDay(date),
+        $gte: date,
+      },
+    });
+
+    if (!metarData) return res.status(200).send({ results: 0, data: [] });
+
+    if (decoded) {
+      const decoded = metarParser(metarData.rawMetar);
+
+      res.status(200).send({ results: 1, data: [decoded] });
+    } else {
+      res.status(200).send({ results: 1, data: [metarData.rawMetar] });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).json("Error: " + error);
+  }
+}
+export default router;
+
 // Find all from date
 // router.get("/", async (req: Request, res: Response) => {
 //   if (!req.query.lat || !req.query.long)
@@ -54,59 +111,3 @@ const router = express.Router();
 //     res.status(400).json("Error: " + error);
 //   }
 // });
-
-router.get("/decoded", async (req: Request, res: Response) => {
-  getMetarData(req, res, true);
-});
-router.get("/", async (req: Request, res: Response) => {
-  getMetarData(req, res);
-});
-
-async function getMetarData(req: Request, res: Response, decoded?: boolean) {
-  if (!req.query.lat || !req.query.long)
-    return res.status(400).send("Wrong coordinate format (?lat=50&long=4)");
-
-  // Find station by coordinates
-  try {
-    const response = await IcaoDataModel.findOne({
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [req.query.long, req.query.lat],
-          },
-        },
-      },
-    });
-    if (!response)
-      return res.status(400).send("No station found for this location");
-
-    if (typeof req.query.date != "string" || !req.query.date)
-      return res.status(400).send("Date is not a string (?date=2022-12-12)");
-
-    // Find station by date
-    const date = new Date(req.query.date);
-
-    const metarData = await MetarDataModel.findOne({
-      ICAO: response.ICAO,
-      createdAt: {
-        $lte: endOfDay(date),
-        $gte: date,
-      },
-    });
-
-    if (!metarData) return res.status(400).send("Such emtpy");
-
-    if (decoded) {
-      const decoded = metarParser(metarData.rawMetar);
-
-      res.status(200).send(decoded);
-    } else {
-      res.status(200).send(metarData.rawMetar);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(400).json("Error: " + error);
-  }
-}
-export default router;
