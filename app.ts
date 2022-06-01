@@ -25,25 +25,6 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
-// Check health status
-app.get("/", async (_req, res) => {
-  try {
-    const response = await MetarDataModel.findOne().sort({ _id: -1 }).limit(1);
-    if (!response) return res.status(201).send("Such emtpy");
-
-    const entryDate = new Date(response.createdAt).getTime();
-    const now = new Date().getTime();
-    const differenceInMinutes = Math.abs(now - entryDate) / 1000 / 60;
-
-    if (differenceInMinutes < 100) return res.status(201).send("Such healthy");
-
-    res.status(201).send("Such bad 😕");
-  } catch (error) {
-    console.error(error);
-    res.status(400).json("Error: " + error);
-  }
-});
-
 app.use("", routes);
 
 const port = process.env.PORT || 3031;
@@ -66,10 +47,7 @@ async function main() {
   console.log("Running cron job at ", new Date());
   try {
     const listOfStations = await getIcaoStationsFromDb();
-
-    // Fetch the data with ICAO Code
     const res = await fetch(listOfStations);
-
     if (!res) throw Error("No data received");
 
     const newDbEntries = res.data.map((el) => {
