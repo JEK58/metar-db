@@ -100,9 +100,9 @@ async function getMetarData(req: Request, res: Response, decoded?: boolean) {
     if (decoded) {
       const decoded = metarParser(metarData.rawMetar);
 
-      res.status(201).send(decoded);
+      res.status(200).send(decoded);
     } else {
-      res.status(201).send(metarData.rawMetar);
+      res.status(200).send(metarData.rawMetar);
     }
   } catch (error) {
     console.error(error);
