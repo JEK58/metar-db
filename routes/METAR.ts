@@ -49,14 +49,14 @@ async function getMetarData(req: Request, res: Response, decoded?: boolean) {
       },
     });
 
-    if (!metarData) return res.status(200).send({ results: 0, data: [] });
+    if (!metarData) return res.status(200).send({ data: [], results: 0 });
 
     if (decoded) {
       const decoded = metarParser(metarData.rawMetar);
 
-      res.status(200).send({ results: 1, data: [decoded] });
+      res.status(200).send({ data: [decoded], results: 1 });
     } else {
-      res.status(200).send({ results: 1, data: [metarData.rawMetar] });
+      res.status(200).send({ data: [metarData.rawMetar], results: 1 });
     }
   } catch (error) {
     console.error(error);

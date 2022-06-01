@@ -10,7 +10,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     res
       .status(200)
-      .send({ results: listOfStations.length, data: listOfStations });
+      .send({ data: listOfStations, results: listOfStations.length });
   } catch (error) {
     console.error(error);
     res.status(400).json("Error: " + error);
@@ -20,7 +20,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:ICAO", async (req: Request, res: Response) => {
   try {
     const response = await IcaoDataModel.findOne({ ICAO: req.params.ICAO });
-    res.status(200).send({ results: 1, data: [response] });
+    res.status(200).send({ data: [response], results: 1 });
   } catch (error) {
     console.error(error);
     res.status(400).json("Error: " + error);
