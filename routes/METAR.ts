@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, Response } from "express";
 import MetarDataModel from "../models/MetarDataModel";
 import IcaoDataModel from "../models/IcaoDataModel";
 import endOfDay from "date-fns/endOfDay";
