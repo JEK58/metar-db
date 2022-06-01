@@ -5,25 +5,25 @@ services:
     image: node:17.8.0-alpine3.15
 
     restart: always
-    container_name: qnh-scraper
+    container_name: metar-db
     environment:
       - NODE_ENV=production
       - DB_CONNECTION=${DB_CONNECTION}
       - MONGO_DB_NAME=${MONGO_DB_NAME}
 
-    working_dir: /qnh-scraper/
+    working_dir: /metar-db/
     volumes:
-      - ./:/qnh-scraper:rw
+      - ./:/metar-db:rw
 
     command: sh -c "yarn install && yarn start"
 
     labels:
       traefik.enable: true
-      traefik.http.routers.qnh-scraper.rule: "Host(`qnh.lurb.org`)"
-      traefik.http.routers.qnh-scraper.entrypoints: websecure
-      traefik.http.routers.qnh-scraper.tls.certresolver: myresolver
-      traefik.http.routers.qnh-scraper.priority: 200
-      traefik.http.services.qnh-scraper.loadbalancer.server.port: 3031
+      traefik.http.routers.metar-db.rule: "Host(`qnh.lurb.org`)"
+      traefik.http.routers.metar-db.entrypoints: websecure
+      traefik.http.routers.metar-db.tls.certresolver: myresolver
+      traefik.http.routers.metar-db.priority: 200
+      traefik.http.services.metar-db.loadbalancer.server.port: 3031
 
 networks:
   default:
