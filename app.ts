@@ -25,6 +25,16 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
+// Protext all routes
+app.use((req, res, next) => {
+  const apiKey = req.get("API-Key");
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    res.status(401).json({ error: "unauthorised" });
+  } else {
+    next();
+  }
+});
+
 app.use("", routes);
 
 const port = process.env.PORT || 3031;
@@ -68,10 +78,11 @@ async function main() {
 
 // Fetch METAR data for ICAO Codes
 async function fetch(ICAO: string[]): Promise<MetarApiResponses | undefined> {
-  if (typeof process.env.API_KEY != "string") throw Error("API_KEY not set");
+  if (typeof process.env.METAR_API_KEY != "string")
+    throw Error("METAR_API_KEY not set");
 
   const options = {
-    headers: { "X-API-Key": process.env.API_KEY },
+    headers: { "X-API-Key": process.env.METAR_API_KEY },
   };
 
   const res = await axios.get(
