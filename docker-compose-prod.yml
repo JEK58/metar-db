@@ -19,7 +19,7 @@ services:
 
     labels:
       traefik.enable: true
-      traefik.http.routers.metar-db.rule: "Host(`qnh.lurb.org`)"
+      traefik.http.routers.metar-db.rule: "Host(`metar.lurb.org`)"
       traefik.http.routers.metar-db.entrypoints: websecure
       traefik.http.routers.metar-db.tls.certresolver: myresolver
       traefik.http.routers.metar-db.priority: 200
