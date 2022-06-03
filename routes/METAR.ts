@@ -9,7 +9,7 @@ import metarParser from "metar-parser";
 
 const router = express.Router();
 
-// Protext route with API key
+// Protect route with API key
 router.use(protectRoute);
 
 router.get("/decoded", async (req: Request, res: Response) => {
