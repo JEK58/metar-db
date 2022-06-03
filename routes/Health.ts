@@ -1,11 +1,13 @@
 import express, { Request, Response } from "express";
-import MetarDataModel from "../models/IcaoDataModel";
+import MetarDataModel from "../models/MetarDataModel";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (_req: Request, res: Response) => {
   try {
-    const response = await MetarDataModel.findOne().sort({ _id: -1 }).limit(1);
+    const response = await MetarDataModel.findOne()
+      .sort({ createdAt: -1 })
+      .limit(1);
     if (!response) return res.status(200).send("Such emtpy");
 
     const entryDate = new Date(response.createdAt).getTime();
