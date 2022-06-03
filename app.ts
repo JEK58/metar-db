@@ -25,16 +25,6 @@ const server = http.createServer(app);
 app.use(express.json());
 // app.use(cors());
 
-// Protext all routes
-app.use((req, res, next) => {
-  const apiKey = req.get("API-Key");
-  if (!apiKey || apiKey !== process.env.API_KEY) {
-    res.status(401).json({ error: "unauthorised" });
-  } else {
-    next();
-  }
-});
-
 app.use("", routes);
 
 const port = process.env.PORT || 3031;
@@ -46,7 +36,7 @@ server.listen(port, () => {
 if (process.env.NODE_ENV === "development") {
   // Run every 30 seconds for development
   console.log("Run cron job every 30 seconds for development");
-  new cron.CronJob("5 * * * * *", main, null, true, "UTC");
+  // new cron.CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
   // Run every hour from 6h to 21h at x:03h
   console.log("Run cron job every hour from 6h to 21h at x:03h");

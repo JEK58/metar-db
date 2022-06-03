@@ -3,10 +3,14 @@ import MetarDataModel from "../models/MetarDataModel";
 import IcaoDataModel from "../models/IcaoDataModel";
 import endOfDay from "date-fns/endOfDay";
 import startOfDay from "date-fns/startOfDay";
+import { protectRoute } from "../middleware/ProtectRoute";
 // @ts-expect-error
 import metarParser from "metar-parser";
 
 const router = express.Router();
+
+// Protext route with API key
+router.use(protectRoute);
 
 router.get("/decoded", async (req: Request, res: Response) => {
   getMetarData(req, res, true);
