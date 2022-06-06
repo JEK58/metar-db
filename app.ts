@@ -39,8 +39,8 @@ if (process.env.NODE_ENV === "development") {
   // new cron.CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
   // Run every 30 minutes from 6h to 21h at :03 & :33
-  console.log("Run cron job every 30 minutes from 6h to 21h at :03 & :33");
-  new cron.CronJob("3,33 6-21 * * * *", main, null, true, "UTC");
+  console.log("Run cron job every 20 minutes from 5h to 21h at x:x3");
+  new cron.CronJob("3,23,43 6-21 * * * *", main, null, true, "UTC");
 }
 
 async function main() {
