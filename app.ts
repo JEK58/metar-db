@@ -10,6 +10,7 @@ import http from "http";
 import routes from "./routes";
 import { getIcaoStationsFromDb } from "./service/IcaoService";
 import axiosRetry from "axios-retry";
+import helmet from "helmet";
 
 axiosRetry(axios, { retries: 3 });
 
@@ -25,6 +26,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
+app.use(helmet());
 app.use(express.json());
 // app.use(cors());
 
