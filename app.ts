@@ -9,6 +9,9 @@ import express from "express";
 import http from "http";
 import routes from "./routes";
 import { getIcaoStationsFromDb } from "./service/IcaoService";
+import axiosRetry from "axios-retry";
+
+axiosRetry(axios, { retries: 3 });
 
 // Error handling
 process.on("uncaughtException", (err) => {
