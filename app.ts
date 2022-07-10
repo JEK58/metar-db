@@ -2,7 +2,6 @@ import "dotenv/config";
 import axios from "axios";
 import "./config/mongoose";
 import MetarDataModel from "./models/MetarDataModel";
-import type { MetarApiResponses } from "./types/MetarData";
 import cron from "cron";
 import { sendMail } from "./config/sendMail";
 import express from "express";
@@ -12,10 +11,10 @@ import { getIcaoStationsFromDb } from "./service/IcaoService";
 import axiosRetry from "axios-retry";
 import helmet from "helmet";
 import { checkStationsOnlineStatus } from "./helper/stationHealthCheck";
+import { fetchMetarData } from "./helper/fetchMetarData";
 
 // Setup
 axiosRetry(axios, { retries: 3 });
-const METAR_API_URL = "https://api.checkwx.com/metar/";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -42,7 +41,7 @@ server.listen(port, () => {
 });
 
 if (process.env.NODE_ENV === "development") {
-  console.log("Run cron job every 30 seconds for development");
+  // console.log("Run cron job every 30 seconds for development");
   // new cron.CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
   console.log("Run cron job every 15 minutes from 5h to 21h");
@@ -54,7 +53,7 @@ async function main() {
   console.log("Running cron job at ", new Date());
   try {
     const listOfStations = await getIcaoStationsFromDb();
-    const res = await fetch(listOfStations);
+    const res = await fetchMetarData(listOfStations);
     if (!res) throw Error("No data received");
 
     const newDbEntries = res.data.map((el) => {
@@ -71,22 +70,4 @@ async function main() {
     console.log(error);
     sendMail("METAR DB Error", JSON.stringify(error));
   }
-}
-
-// Fetch METAR data for ICAO Codes
-async function fetch(ICAO: string[]): Promise<MetarApiResponses | undefined> {
-  if (typeof process.env.METAR_API_KEY != "string")
-    throw Error("METAR_API_KEY not set");
-
-  const options = {
-    headers: { "X-API-Key": process.env.METAR_API_KEY },
-  };
-
-  const res = await axios.get(
-    METAR_API_URL + ICAO.join(",") + "/decoded",
-    options
-  );
-  if (!res.data || res.data.results === 0) return;
-
-  return res.data;
 }
