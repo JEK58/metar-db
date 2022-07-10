@@ -11,8 +11,11 @@ import routes from "./routes";
 import { getIcaoStationsFromDb } from "./service/IcaoService";
 import axiosRetry from "axios-retry";
 import helmet from "helmet";
+import { checkStationsOnlineStatus } from "./helper/stationHealthCheck";
 
+// Setup
 axiosRetry(axios, { retries: 3 });
+const METAR_API_URL = "https://api.checkwx.com/metar/";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -44,6 +47,7 @@ if (process.env.NODE_ENV === "development") {
 } else {
   console.log("Run cron job every 15 minutes from 5h to 21h");
   new cron.CronJob("*/15 5-21 * * * ", main, null, true, "UTC");
+  new cron.CronJob("0 23 * * * ", checkStationsOnlineStatus, null, true, "UTC");
 }
 
 async function main() {
@@ -79,7 +83,7 @@ async function fetch(ICAO: string[]): Promise<MetarApiResponses | undefined> {
   };
 
   const res = await axios.get(
-    "https://api.checkwx.com/metar/" + ICAO.join(",") + "/decoded",
+    METAR_API_URL + ICAO.join(",") + "/decoded",
     options
   );
   if (!res.data || res.data.results === 0) return;
