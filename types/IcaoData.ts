@@ -5,6 +5,7 @@ export interface IcaoData {
   city: string;
   country: string;
   location: GeoJSON.Point;
+  active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

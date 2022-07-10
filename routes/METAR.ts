@@ -48,8 +48,6 @@ async function getMetarData(req: Request, res: Response, decoded?: boolean) {
     // Find station by date
     const date = new Date(req.query.date);
 
-    console.log(endOfDay(date));
-
     const metarData = await MetarDataModel.findOne({
       ICAO: response.ICAO,
       createdAt: {

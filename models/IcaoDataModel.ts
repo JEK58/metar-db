@@ -31,6 +31,10 @@ const IcaoDataSchema = new Schema<IcaoData>({
     type: pointSchema,
     required: true,
   },
+  active: {
+    type: Boolean,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: () => new Date(),
