@@ -1,5 +1,6 @@
-import axios, { AxiosResponse } from "axios";
+import startOfDay from "date-fns/startOfDay";
 import { sendMail } from "../config/sendMail";
+import MetarDataModel from "../models/MetarDataModel";
 import {
   getActiveIcaoStationsFromDb,
   getInactiveIcaoStationsFromDb,
@@ -12,34 +13,42 @@ export async function checkStationsOnlineStatus() {
     const listOfActiveStations = await getActiveIcaoStationsFromDb();
     const newInactiveStations: string[] = [];
 
-    const activeAxiosRequests = createAxiosRequests(listOfActiveStations);
-    const activeRes = await Promise.all(activeAxiosRequests);
+    for await (const station of listOfActiveStations) {
+      const today = new Date();
 
-    activeRes.forEach((response) => {
-      const data = response.data;
-      if (data.results < 1) newInactiveStations.push(response.request.path);
-    });
+      const response = await MetarDataModel.findOne({
+        ICAO: station,
+        createdAt: { $gt: startOfDay(today) },
+      }).sort({ createdAt: -1 });
+
+      if (!response) {
+        console.log(station, "appears to be offline");
+        newInactiveStations.push(station);
+      }
+    }
 
     if (newInactiveStations.length) {
-      sendMail(
-        "METAR station(s) offline",
-        JSON.stringify(newInactiveStations, null, "\n")
-      );
+      sendMail("METAR station(s) offline", newInactiveStations.join("\n"));
     } else {
-      sendMail("METAR DB: All stations online", "");
+      sendMail("METAR DB: All active stations online", "");
     }
 
     // Check inactive stations
     const listOfInactiveStations = await getInactiveIcaoStationsFromDb();
     const newOnlineStations: string[] = [];
 
-    const inactiveAxiosRequests = createAxiosRequests(listOfInactiveStations);
-    const inactiveRes = await Promise.all(inactiveAxiosRequests);
+    for await (const station of listOfInactiveStations) {
+      const today = new Date();
 
-    inactiveRes.forEach((response) => {
-      const data = response.data;
-      if (data.results > 0) newOnlineStations.push(response.request.path);
-    });
+      const response = await MetarDataModel.findOne({
+        ICAO: station,
+        createdAt: { $gt: startOfDay(today) },
+      }).sort({ createdAt: -1 });
+
+      if (response) {
+        newOnlineStations.push(station);
+      }
+    }
 
     if (newOnlineStations.length)
       sendMail(
@@ -52,20 +61,4 @@ export async function checkStationsOnlineStatus() {
     console.log(error);
     sendMail("METAR DB Error", JSON.stringify(error));
   }
-}
-
-function createAxiosRequests(stations: string[]) {
-  const METAR_API_URL = "https://api.checkwx.com/metar/";
-  const axiosRequests: Promise<AxiosResponse<any, any>>[] = [];
-  stations.forEach(async (station) => {
-    if (typeof process.env.METAR_API_KEY != "string")
-      throw Error("METAR_API_KEY not set");
-
-    const options = {
-      headers: { "X-API-Key": process.env.METAR_API_KEY },
-    };
-
-    axiosRequests.push(axios.get(METAR_API_URL + station, options));
-  });
-  return axiosRequests;
 }
