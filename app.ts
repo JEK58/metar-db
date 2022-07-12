@@ -45,8 +45,8 @@ if (process.env.NODE_ENV === "development") {
   // new cron.CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
   console.log("Run cron job every 15 minutes from 5h to 21h");
-  new cron.CronJob("*/15 5-21 * * * ", main, null, true, "UTC");
-  new cron.CronJob("0 23 * * * ", checkStationsOnlineStatus, null, true, "UTC");
+  new cron.CronJob("*/15 4-21 * * * ", main, null, true, "UTC");
+  new cron.CronJob("0 21 * * * ", checkStationsOnlineStatus, null, true, "UTC");
 }
 
 async function main() {
