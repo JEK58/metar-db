@@ -68,6 +68,6 @@ async function main() {
     console.log("…done");
   } catch (error) {
     console.log(error);
-    sendMail("METAR DB Error", JSON.stringify(error));
+    sendMail("⚠️ METAR DB Error", JSON.stringify(error));
   }
 }

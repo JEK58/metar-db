@@ -28,9 +28,9 @@ export async function checkStationsOnlineStatus() {
     }
 
     if (newInactiveStations.length) {
-      sendMail("METAR station(s) offline", newInactiveStations.join("\n"));
+      sendMail("⚠️ METAR station(s) offline", newInactiveStations.join("\n"));
     } else {
-      sendMail("METAR DB: All active stations online", "");
+      sendMail("✅ METAR DB: All active stations online", "");
     }
 
     // Check inactive stations
@@ -52,13 +52,13 @@ export async function checkStationsOnlineStatus() {
 
     if (newOnlineStations.length)
       sendMail(
-        "METAR station(s) back online",
+        "🟧 METAR station(s) back online",
         JSON.stringify(newOnlineStations, null, "\n")
       );
 
     console.log("…done");
   } catch (error) {
     console.log(error);
-    sendMail("METAR DB Error", JSON.stringify(error));
+    sendMail("⚠️ METAR DB Error", JSON.stringify(error));
   }
 }
