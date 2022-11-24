@@ -30,7 +30,7 @@ export async function checkStationsOnlineStatus() {
     if (newInactiveStations.length) {
       sendMail("⚠️ METAR station(s) offline", newInactiveStations.join("\n"));
     } else {
-      sendMail("✅ METAR DB: All active stations online", "---");
+      // sendMail("✅ METAR DB: All active stations online", "---");
     }
 
     // Check inactive stations
