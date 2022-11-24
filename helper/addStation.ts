@@ -4,8 +4,10 @@ import {
   addStation,
   getIcaoDetails,
   getIcaoStationsFromDb,
+  getActiveIcaoStationsFromDb,
 } from "../service/IcaoService";
 import { initializeDB } from "../config/mongoose";
+import { fetchMetarData } from "./fetchMetarData";
 
 async function getStationDetails(ICAO: string[]) {
   const METAR_API_URL = "https://api.checkwx.com/station/";
@@ -81,5 +83,75 @@ async function findDuplicates() {
     const station = await IcaoDataModel.find({ ICAO: res[index] });
   }
 }
+
+async function findEmptyStations() {
+  await initializeDB();
+
+  const res = await getActiveIcaoStationsFromDb();
+
+  for (let i = 0; i < res.length; i++) {
+    const data = await fetchMetarData([res[i]]);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    if (!data) console.log("No data for: ", res[i]);
+  }
+}
+
+const deactive = [
+  "ETEK",
+  "EDAX",
+  "EDBN",
+  "EDEL",
+  "EDFE",
+  "EDFK",
+  "EDFQ",
+  "EDFZ",
+  "EDHE",
+  "EDKA",
+  "EDLS",
+  "EDON",
+  "EDQA",
+  "EDQD",
+  "EDQG",
+  "EDRB",
+  "EDRH",
+  "EDRN",
+  "EDRT",
+  "EDRZ",
+  "EDTF",
+  "EDVA",
+  "EDWG",
+  "EDWO",
+  "EDWR",
+  "EDXA",
+  "EDXB",
+  "EDXH",
+  "ETEJ",
+  "ETIE",
+  "ETNU",
+  "ETSF",
+  "ETUO",
+  "EDBH",
+  "ETHE",
+  "ETID",
+  "ETUR",
+];
+async function deactivateStation() {
+  await initializeDB();
+
+  for (let index = 0; index < deactive.length; index++) {
+    const res = await IcaoDataModel.findOneAndUpdate(
+      { ICAO: deactive[index] },
+      { active: false },
+      {
+        new: true,
+      }
+    );
+    console.log(res);
+  }
+}
 // main();
 // findDuplicates();
+findEmptyStations();
+
+// deactivateStation();
