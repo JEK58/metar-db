@@ -21,7 +21,11 @@ const IcaoDataSchema = new Schema<IcaoData>({
   },
   city: {
     type: String,
-    required: true,
+    required: false,
+  },
+  name: {
+    type: String,
+    required: false,
   },
   country: {
     type: String,
@@ -33,6 +37,7 @@ const IcaoDataSchema = new Schema<IcaoData>({
   },
   active: {
     type: Boolean,
+    default: () => true,
     required: true,
   },
   createdAt: {
