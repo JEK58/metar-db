@@ -65,7 +65,7 @@ async function main() {
     });
     await MetarDataModel.insertMany(newDbEntries);
 
-    console.log("…done");
+    console.log("…done: ", newDbEntries.length);
   } catch (error) {
     console.log(error);
     sendMail("⚠️ METAR DB Error", JSON.stringify(error));
