@@ -21,8 +21,6 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 async function getMetarData(req: Request, res: Response, decoded?: boolean) {
-  console.log(req.query);
-
   if (!req.query.lat || !req.query.long)
     return res.status(400).send("Wrong coordinate format (?lat=50&long=4)");
 
