@@ -2,7 +2,8 @@ import type { GeoJSON } from "geojson";
 
 export interface IcaoData {
   ICAO: string;
-  city: string;
+  city?: string;
+  name?: string;
   country: string;
   location: GeoJSON.Point;
   active: boolean;
@@ -11,4 +12,4 @@ export interface IcaoData {
 }
 
 export interface IcaoDataCreate
-  extends Omit<IcaoData, "createdAt" | "updatedAt"> {}
+  extends Omit<IcaoData, "createdAt" | "updatedAt" | "active"> {}
