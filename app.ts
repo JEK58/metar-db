@@ -51,9 +51,10 @@ if (process.env.NODE_ENV === "development") {
 
 async function main() {
   console.log("Running cron job at ", new Date());
+  let res;
   try {
     const listOfStations = await getIcaoStationsFromDb();
-    const res = await fetchMetarData(listOfStations);
+    res = await fetchMetarData(listOfStations);
     if (!res) throw Error("No data received");
 
     const newDbEntries = res.data.map((el) => {
@@ -68,6 +69,6 @@ async function main() {
     console.log("…done: ", newDbEntries.length);
   } catch (error) {
     console.log(error);
-    sendMail("⚠️ METAR DB Error", JSON.stringify(error));
+    sendMail("⚠️ METAR DB Error", JSON.stringify(error) + JSON.stringify(res));
   }
 }
