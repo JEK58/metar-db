@@ -2,7 +2,6 @@ import express, { type Request, Response } from "express";
 import MetarDataModel from "../models/MetarDataModel";
 import IcaoDataModel from "../models/IcaoDataModel";
 import endOfDay from "date-fns/endOfDay";
-import startOfDay from "date-fns/startOfDay";
 import { protectRoute } from "../middleware/ProtectRoute";
 // @ts-expect-error
 import metarParser from "metar-parser";
