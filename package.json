@@ -13,26 +13,26 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/cron": "^2.0.0",
-    "@types/express": "^4.17.14",
-    "@types/geojson": "^7946.0.10",
-    "@types/node": "^18.11.9",
-    "@types/nodemailer": "^6.4.6",
-    "taze": "^0.8.4",
+    "@types/cron": "^2.4.0",
+    "@types/express": "^4.17.21",
+    "@types/geojson": "^7946.0.13",
+    "@types/node": "^20.11.0",
+    "@types/nodemailer": "^6.4.14",
+    "taze": "^0.13.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^4.9.3"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "axios": "0.27.2",
-    "axios-retry": "^3.3.1",
-    "cron": "^2.1.0",
-    "date-fns": "^2.29.3",
-    "dotenv": "^16.0.3",
+    "axios": "1.6.5",
+    "axios-retry": "^4.0.0",
+    "cron": "^3.1.6",
+    "date-fns": "^3.2.0",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "helmet": "^5.1.1",
+    "helmet": "^7.1.0",
     "metar-parser": "^1.0.1",
-    "mongoose": "^6.7.3",
-    "nodemailer": "^6.8.0",
-    "ts-node": "^10.9.1"
+    "mongoose": "^8.0.4",
+    "nodemailer": "^6.9.8",
+    "ts-node": "^10.9.2"
   }
 }

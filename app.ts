@@ -2,7 +2,7 @@ import "dotenv/config";
 import axios from "axios";
 import "./config/mongoose";
 import MetarDataModel from "./models/MetarDataModel";
-import cron from "cron";
+import { CronJob } from "cron";
 import { sendMail } from "./config/sendMail";
 import express from "express";
 import http from "http";
@@ -39,14 +39,13 @@ const port = process.env.PORT || 3031;
 server.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
-
 if (process.env.NODE_ENV === "development") {
-  // console.log("Run cron job every 30 seconds for development");
-  // new cron.CronJob("5 * * * * *", main, null, true, "UTC");
+  // console.log("Run cron job every 5 seconds for development");
+  // new CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
   console.log("Run cron job every 15 minutes");
-  new cron.CronJob("*/15 * * * * ", main, null, true, "UTC");
-  new cron.CronJob("0 21 * * * ", checkStationsOnlineStatus, null, true, "UTC");
+  new CronJob("*/15 * * * * ", main, null, true, "UTC");
+  new CronJob("0 21 * * * ", checkStationsOnlineStatus, null, true, "UTC");
 }
 
 async function main() {

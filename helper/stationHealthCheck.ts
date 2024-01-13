@@ -1,4 +1,4 @@
-import startOfDay from "date-fns/startOfDay";
+import { startOfDay } from "date-fns";
 import { sendMail } from "../config/sendMail";
 import MetarDataModel from "../models/MetarDataModel";
 import {
