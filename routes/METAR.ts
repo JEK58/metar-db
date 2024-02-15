@@ -43,15 +43,29 @@ async function getMetarData(req: Request, res: Response, decoded?: boolean) {
       return res.status(400).send("Date is not a string (?date=2022-12-12)");
 
     // Find station by date
+    const MAX_SEARCH_DIFFERENCE = 30 * 60 * 1000; // 30 minutes in milliseconds
     const date = new Date(req.query.date);
-
-    const metarData = await MetarDataModel.findOne({
-      ICAO: response.ICAO,
-      createdAt: {
-        $lte: endOfDay(date),
-        $gte: date,
+    const metarData = await MetarDataModel.aggregate([
+      {
+        $match: {
+          ICAO: response.ICAO,
+        },
       },
-    });
+      {
+        $addFields: {
+          absDifference: {
+            $abs: { $subtract: [date, "$createdAt"] },
+          },
+        },
+      },
+      {
+        $match: {
+          absDifference: { $lte: MAX_SEARCH_DIFFERENCE },
+        },
+      },
+      { $sort: { absDifference: 1 } },
+      { $limit: 1 },
+    ]).then((result) => result[0]); // get the first item from the result array
 
     if (!metarData) return res.status(200).send({ data: [], results: 0 });
 
