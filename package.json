@@ -15,10 +15,10 @@
   "devDependencies": {
     "@types/cron": "^2.4.0",
     "@types/express": "^4.17.21",
-    "@types/geojson": "^7946.0.13",
-    "@types/node": "^20.11.0",
+    "@types/geojson": "^7946.0.14",
+    "@types/node": "^20.11.18",
     "@types/nodemailer": "^6.4.14",
-    "taze": "^0.13.1",
+    "taze": "^0.13.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   },
@@ -26,13 +26,13 @@
     "axios": "1.6.5",
     "axios-retry": "^4.0.0",
     "cron": "^3.1.6",
-    "date-fns": "^3.2.0",
-    "dotenv": "^16.3.1",
+    "date-fns": "^3.3.1",
+    "dotenv": "^16.4.4",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
     "metar-parser": "^1.0.1",
-    "mongoose": "^8.0.4",
-    "nodemailer": "^6.9.8",
+    "mongoose": "^8.1.2",
+    "nodemailer": "^6.9.9",
     "ts-node": "^10.9.2"
   }
 }
