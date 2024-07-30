@@ -1,17 +1,16 @@
-version: "3.8"
-
 services:
   server:
     image: node:18.4.0-alpine3.16
 
     restart: always
-    container_name: metar-db
     environment:
       - NODE_ENV=production
-      - DB_CONNECTION=${DB_CONNECTION}
-      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - DB_CONNECTION=mongodb://mongo:27017
+      - MONGO_DB_NAME=metar
 
     working_dir: /metar-db/
+    depends-on:
+      - mongo
     volumes:
       - ./:/metar-db:rw
 
@@ -19,13 +18,18 @@ services:
 
     labels:
       traefik.enable: true
-      traefik.http.routers.metar-db.rule: "Host(`metar.lurb.org`)"
+      traefik.http.routers.metar-db.rule: "Host(`metar.xccup.org`)"
       traefik.http.routers.metar-db.entrypoints: websecure
       traefik.http.routers.metar-db.tls.certresolver: myresolver
       traefik.http.routers.metar-db.priority: 200
       traefik.http.services.metar-db.loadbalancer.server.port: 3031
 
+  mongo:
+    image: mongo
+    restart: always
+
 networks:
-  default:
-    name: traefik
+  traefik:
     external: true
+  internal:
+    driver: bridge
