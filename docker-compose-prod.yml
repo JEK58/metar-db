@@ -9,7 +9,7 @@ services:
       - MONGO_DB_NAME=metar
 
     working_dir: /metar-db/
-    depends-on:
+    depends_on:
       - mongo
     volumes:
       - ./:/metar-db:rw
