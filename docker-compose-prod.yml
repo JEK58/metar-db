@@ -27,10 +27,13 @@ services:
       
     networks:
       - traefik
+      - internal
 
   mongo:
     image: mongo
     restart: always
+    networks: 
+      - internal
 
 networks:
   traefik:
