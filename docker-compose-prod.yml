@@ -18,11 +18,15 @@ services:
 
     labels:
       traefik.enable: true
-      traefik.http.routers.metar-db.rule: "Host(`metar.xccup.org`)"
+      traefik.http.routers.metar-db.rule: "Host(`metar.xccup.net`)"
       traefik.http.routers.metar-db.entrypoints: websecure
       traefik.http.routers.metar-db.tls.certresolver: myresolver
       traefik.http.routers.metar-db.priority: 200
       traefik.http.services.metar-db.loadbalancer.server.port: 3031
+      traefik.docker.network: traefik
+      
+    networks:
+      - traefik
 
   mongo:
     image: mongo
