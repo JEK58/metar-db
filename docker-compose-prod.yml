@@ -24,7 +24,7 @@ services:
       traefik.http.routers.metar-db.priority: 200
       traefik.http.services.metar-db.loadbalancer.server.port: 3031
       traefik.docker.network: traefik
-      
+
     networks:
       - traefik
       - internal
@@ -32,8 +32,15 @@ services:
   mongo:
     image: mongo
     restart: always
-    networks: 
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - mongo-metar-data:/data/db
+    networks:
       - internal
+
+volumes:
+  mongo-metar-data:
 
 networks:
   traefik:
