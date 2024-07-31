@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  server:
+    image: node:18.4.0-alpine3.16
+    restart: always
+    container_name: metar-db
+    environment:
+      - NODE_ENV=development
+      - DB_CONNECTION=${DB_CONNECTION}
+    working_dir: /metar-db/
+    volumes:
+      - ./:/metar-db:rw
+    command: sh -c "yarn install && yarn dev"
+    ports:
+      - 3031:3031
+
+ 
