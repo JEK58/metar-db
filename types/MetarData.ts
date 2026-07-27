@@ -12,9 +12,17 @@ export interface MetarApiResponse {
   observed: string;
 }
 
+export interface MetarApiBatchFailure {
+  icaos: string[];
+  message: string;
+  status?: number;
+  detail?: unknown;
+}
+
 export interface MetarApiResponses {
   data: MetarApiResponse[];
   results: number;
+  failures?: MetarApiBatchFailure[];
 }
 
 export interface MetarDataCreate

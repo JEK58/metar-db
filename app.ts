@@ -66,11 +66,48 @@ async function main() {
     await MetarDataModel.insertMany(newDbEntries);
 
     console.log("…done: ", newDbEntries.length);
+
+    if (res.failures?.length) {
+      const failureReport = JSON.stringify({ failures: res.failures }, null, 2);
+      console.error("CheckWX batch failure", failureReport);
+      await sendMail("⚠️ METAR DB: CheckWX batch failure", failureReport);
+    }
   } catch (error) {
-    console.log(error);
-    sendMail(
+    const safeError = serializeError(error);
+    console.error("METAR DB error", safeError);
+    await sendMail(
       "⚠️ METAR DB Error",
-      JSON.stringify(error) + JSON.stringify(listOfStations)
+      JSON.stringify(
+        {
+          error: safeError,
+          stations: listOfStations,
+        },
+        null,
+        2
+      )
     );
   }
+}
+
+function serializeError(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    return {
+      name: error.name,
+      message: error.message,
+      status: error.response?.status,
+      detail: error.response?.data,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
 }

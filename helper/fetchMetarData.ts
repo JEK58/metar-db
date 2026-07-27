@@ -1,7 +1,11 @@
 import axios from "axios";
-import { MetarApiResponses } from "../types/MetarData";
+import {
+  MetarApiBatchFailure,
+  MetarApiResponses,
+} from "../types/MetarData";
 
 const METAR_API_URL = "https://api.checkwx.com/metar/";
+const MAX_ICAOS_PER_REQUEST = 25;
 
 // Fetch METAR data for ICAO Codes
 export async function fetchMetarData(
@@ -14,11 +18,56 @@ export async function fetchMetarData(
     headers: { "X-API-Key": process.env.METAR_API_KEY },
   };
 
-  const res = await axios.get(
-    METAR_API_URL + ICAO.join(",") + "/decoded",
-    options
-  );
-  if (!res.data || res.data.results === 0) return;
+  const batches: string[][] = [];
+  for (let index = 0; index < ICAO.length; index += MAX_ICAOS_PER_REQUEST) {
+    batches.push(ICAO.slice(index, index + MAX_ICAOS_PER_REQUEST));
+  }
 
-  return res.data;
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      try {
+        const response = await axios.get<MetarApiResponses>(
+          METAR_API_URL + batch.join(",") + "/decoded",
+          options
+        );
+
+        return {
+          data: response.data?.data ?? [],
+        };
+      } catch (error) {
+        const failure: MetarApiBatchFailure = {
+          icaos: batch,
+          message:
+            error instanceof Error ? error.message : "Unknown CheckWX error",
+        };
+
+        if (axios.isAxiosError(error)) {
+          failure.status = error.response?.status;
+          failure.detail = error.response?.data;
+        }
+
+        return {
+          data: [],
+          failure,
+        };
+      }
+    })
+  );
+
+  const data = batchResults.reduce<MetarApiResponses["data"]>(
+    (allData, result) => allData.concat(result.data),
+    []
+  );
+  const failures = batchResults.reduce<MetarApiBatchFailure[]>(
+    (allFailures, result) =>
+      result.failure ? allFailures.concat(result.failure) : allFailures,
+    []
+  );
+  if (data.length === 0 && failures.length === 0) return;
+
+  return {
+    data,
+    results: data.length,
+    ...(failures.length > 0 ? { failures } : {}),
+  };
 }
