@@ -8,13 +8,13 @@ import express from "express";
 import http from "http";
 import routes from "./routes";
 import { getIcaoStationsFromDb } from "./service/IcaoService";
-import axiosRetry from "axios-retry";
 import helmet from "helmet";
 import { checkStationsOnlineStatus } from "./helper/stationHealthCheck";
 import { fetchMetarData } from "./helper/fetchMetarData";
 
 // Setup
-axiosRetry(axios, { retries: 3 });
+const METAR_CRON_SCHEDULE =
+  process.env.METAR_CRON_SCHEDULE || "*/30 * * * *";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -43,8 +43,8 @@ if (process.env.NODE_ENV === "development") {
   // console.log("Run cron job every 5 seconds for development");
   // new CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
-  console.log("Run cron job every 15 minutes");
-  new CronJob("*/15 * * * * ", main, null, true, "UTC");
+  console.log("METAR cron schedule:", METAR_CRON_SCHEDULE);
+  new CronJob(METAR_CRON_SCHEDULE, main, null, true, "UTC");
   new CronJob("0 21 * * * ", checkStationsOnlineStatus, null, true, "UTC");
 }
 
