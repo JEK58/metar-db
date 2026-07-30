@@ -12,9 +12,11 @@ import helmet from "helmet";
 import { checkStationsOnlineStatus } from "./helper/stationHealthCheck";
 import { fetchMetarData } from "./helper/fetchMetarData";
 
-// Setup
-const METAR_CRON_SCHEDULE =
-  process.env.METAR_CRON_SCHEDULE || "*/30 * * * *";
+// Every 20 minutes from 09:00 through 20:40, plus 21:00:
+// four CheckWX batches × 37 runs = 148 daily requests.
+const METAR_CRON_SCHEDULE = "*/20 9-20 * * *";
+const METAR_FINAL_CRON_SCHEDULE = "0 21 * * *";
+const METAR_CRON_TIME_ZONE = "Europe/Berlin";
 
 // Error handling
 process.on("uncaughtException", (err) => {
@@ -43,8 +45,27 @@ if (process.env.NODE_ENV === "development") {
   // console.log("Run cron job every 5 seconds for development");
   // new CronJob("5 * * * * *", main, null, true, "UTC");
 } else {
-  console.log("METAR cron schedule:", METAR_CRON_SCHEDULE);
-  new CronJob(METAR_CRON_SCHEDULE, main, null, true, "UTC");
+  console.log(
+    "METAR cron schedule:",
+    METAR_CRON_SCHEDULE,
+    "+",
+    METAR_FINAL_CRON_SCHEDULE,
+    METAR_CRON_TIME_ZONE
+  );
+  new CronJob(
+    METAR_CRON_SCHEDULE,
+    main,
+    null,
+    true,
+    METAR_CRON_TIME_ZONE
+  );
+  new CronJob(
+    METAR_FINAL_CRON_SCHEDULE,
+    main,
+    null,
+    true,
+    METAR_CRON_TIME_ZONE
+  );
   new CronJob("0 21 * * * ", checkStationsOnlineStatus, null, true, "UTC");
 }
 
