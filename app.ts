@@ -12,10 +12,9 @@ import helmet from "helmet";
 import { checkStationsOnlineStatus } from "./helper/stationHealthCheck";
 import { fetchMetarData } from "./helper/fetchMetarData";
 
-// Every 20 minutes from 09:00 through 20:40, plus 21:00:
-// four CheckWX batches × 37 runs = 148 daily requests.
-const METAR_CRON_SCHEDULE = "*/20 9-20 * * *";
-const METAR_FINAL_CRON_SCHEDULE = "0 21 * * *";
+// Every 20 minutes from 09:00 through 21:40:
+// four CheckWX batches × 39 runs = 156 daily requests.
+const METAR_CRON_SCHEDULE = "*/20 9-21 * * *";
 const METAR_CRON_TIME_ZONE = "Europe/Berlin";
 
 // Error handling
@@ -48,19 +47,10 @@ if (process.env.NODE_ENV === "development") {
   console.log(
     "METAR cron schedule:",
     METAR_CRON_SCHEDULE,
-    "+",
-    METAR_FINAL_CRON_SCHEDULE,
     METAR_CRON_TIME_ZONE
   );
   new CronJob(
     METAR_CRON_SCHEDULE,
-    main,
-    null,
-    true,
-    METAR_CRON_TIME_ZONE
-  );
-  new CronJob(
-    METAR_FINAL_CRON_SCHEDULE,
     main,
     null,
     true,
